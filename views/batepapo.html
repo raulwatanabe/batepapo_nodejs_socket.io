@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Servidor de Bate-papo</title>
+        <link rel="stylesheet" href="public/css/estilo.css">
+    </head>
+
+    <body>
+
+        <div class="usuario" id="darApelido">
+
+            <span>Entre com seu Apelido</span>
+            <input class="apelido" type="text" maxlength="15" />
+
+        </div>
+
+        <div class="batepapo" hidden>
+
+            <div class="menu">
+                <div class="nome" id="nome">Nome</div>
+                <div class="last" id="hora">Hora</div>
+            </div>
+
+            <ol class="mensagens">
+
+            </ol>
+
+            <div class="rodape"></div>
+            <input class="mensagem" id="falei" type="text" placeholder="Digite sua mensagem aqui" />
+
+        </div>
+
+        <script src="node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+        <script src="public/js/batepapo.js"></script>
+
+    </body>
+</html>
