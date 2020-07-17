@@ -1,15 +1,15 @@
 version: '3'
 
 services:
-        db:
-                image: mongo
-                restart: unless-stopped
-                volumes:
-                        - /home/raul/mongo:/data/db
-                ports:
-                        - '27017:27017'
-                networks:
-                        - paponet
+#        db:
+#                image: mongo
+#                restart: unless-stopped
+#                volumes:
+#                        - /home/raul/mongo:/data/db
+#                ports:
+#                        - '27017:27017'
+#                networks:
+#                        - paponet
         app:
                 container_name: batepapo-nodejs
                 build: .
@@ -18,11 +18,11 @@ services:
                         - .:/code
                 ports:
                         - '3000:3000'
-                depends_on:
-                        - db
-                networks:
-                        - paponet
-networks:
-        paponet:
-                driver: bridge
+#                depends_on:
+#                        - db
+#                networks:
+#                        - paponet
+#networks:
+#        paponet:
+#                driver: bridge
                 

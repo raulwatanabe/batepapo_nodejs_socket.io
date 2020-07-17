@@ -8,9 +8,9 @@ $(document).ready(function() {
     var pronto = false;
     var nomeDoCliente;
 
-    var INTERVALO_FADE = 200;  // ms
+    const INTERVALO_FADE = 200;  // ms
+    const $quadro = $( '.quadro' );
 
-    var $mensagens = $( '.mensagens' );
     var $apelido = $( '.apelido' ); // input apelido
     var $mensagem = $( '.mensagem' );
 
@@ -20,18 +20,16 @@ $(document).ready(function() {
         if (nomeDoCliente) {
             $usuario.slideUp("slow");
             
-            // var nome = $( ".apelido" ).val();
             var hora = new Date();
 
-            // $("#nome").html(nome);
             $("#nome").html(nomeDoCliente);
 
             $("#hora").html( 'Primeiro Login: ' + hora.getHours() + ':' + hora.getMinutes() );
 
             
             $batepapo.slideDown("slow");
-            // $usuario.off('click');
-            // $batepapo.on('click');
+
+            pronto = true;
 
             socket.emit( 'entrar', { "nome": nomeDoCliente} );
         }
@@ -43,52 +41,38 @@ $(document).ready(function() {
 
     $window.keydown( evento => {
 
-        console.log( "Entrei em keyDown.....");
-
-
-        // tem coisas
         var texto = $( "#falei" ).val();
 
         if (evento.which === 13) {
             if (nomeDoCliente) {
-                //
+
                 $("#falei").val('');
                 
-                dizer( texto );
+                dizer( texto, {falador: 'eu'} );
+                socket.emit( 'enviar', texto );
             } else {
                 setNome();
             }
         }
     });
 
-    /*
-    $("#textarea").keypress( function(e) {
-        if (e.which == 13 ) {
-            var text = $( "#textarea" ).val();
-            $("#textarea").val('');
-            var hora = new Date();
-
-            $( ".batepapo" ).append( '<li class="self"><div class="msg"><span>' +
-            $("#apelido").val() + ':</span><p>' + text + '</p><hora>' + hora.getHours() +
-            ':' + hora.getMinutes() + '</hora></div></li>' );
-
-            socket.emit( "enviar", text );
-
-            // Scroll
-            document.getElementById( 'rodape' ).scrollIntoView();
-
-        }
-    });
-*/
-
-
-    // 
-
     const dizer = (mensagem, opcoes ) => {
         var hora = new Date();
-        //$(".mensagens").append('<li class="me"><div class="msg"><span>' + $(".apelido").val() + ':</span><p>' + texto + '</p><time>' + hora.getHours()  )
+        let $el;
 
-        var $el = $( '<li>' ).addClass('me').text(mensagem);
+        if (!opcoes.falador || opcoes.falador == 'eu') {
+            $el = $( '<li>' ).addClass('eu').text(mensagem)
+                        .append(' - <time>' + 
+                                hora.getHours()+':'+hora.getMinutes() +
+                                '</time>');
+        } else {
+            $el = $( '<li>' ).addClass(opcoes.falador)
+                        .append(
+                            '<time>' +
+                            hora.getHours()+':'+hora.getMinutes() +
+                            '</time>'     
+                        ).text(mensagem);
+        }
         adicionaMensagem( $el, opcoes );
     }
 
@@ -114,11 +98,11 @@ $(document).ready(function() {
         }
 
         if (opcoes.prepend) {
-            $mensagens.prepend($el);
+            $quadro.prepend($el);
         } else {
-            $mensagens.append( $el );
+            $quadro.append( $el );
         }
-        $mensagens[0].scrollTop = $mensagens[0].scrollHeight;
+        $quadro[0].scrollTop = $quadro[0].scrollHeight;
     }
 
 
@@ -129,21 +113,17 @@ $(document).ready(function() {
     });
 
 
-
-
     socket.on( "entrou", function(msg) {
-        var mensagem = "Bem vindo ao Bate-papo - " + msg.nome;
+        var mensagem = "Bem vindo ao Bate-papo - " + msg.nomeDoCliente;
         
-        console.log( "->entrou" );
-        console.log( mensagem );
-
-        dizer( mensagem, {prepend: true});
-        qtosClientesMsg( msg );
+        dizer( mensagem, {prepend: true, falador: "servidor"});
+        //qtosClientesMsg( msg );
     });
 
     socket.on( "juntou-se", function(msg) {
-        dizer( msg.nomeDoCliente + " entrou no Bate-papo");
-        qtosClientesMsg( msg );
+        dizer( msg.nomeDoCliente + " entrou no Bate-papo",
+                {falador: "servidor"});
+        //qtosClientesMsg( msg );
     });
 
     socket.on( "atualizar", function(msg) {
@@ -152,12 +132,22 @@ $(document).ready(function() {
         }
     });
 
-    socket.on( "batepapo", function( cliente, msg ) {
+    socket.on( "papo", function( quem, msg ) {
         if (pronto) {
+
             var hora = new Date();
-            $( ".batepapo" ).append( '<li class="field"><div class="msg"><span>' + cliente +
-            ':</span><p>' + msg + '</p><hora>' + hora.getHours() + ':' + hora.getMinutes() + 
-            '</hora></div></li>' );
+            $( ".quadro" )
+                .append( '<li class="mensagens" ' +
+                '><div class="msg" style="color:' + quem.cor + ';">' +
+                    '<p>' +
+                        '<time>'+ hora.getHours()+':'+ hora.getMinutes() +
+                        '</time>' +
+                        '<span>&nbsp;' + 
+                        quem.nomeDoCliente +
+                        ':&nbsp;</span>' + 
+                        msg + 
+                '   </p>' + 
+                '</div></li>' );
         }
 
     });
